@@ -64,7 +64,7 @@ struct Engine {
     // Outputs the number of comparisons made in the search.
     const Record *findById(int id, int &cmpOut) {
         int* idIndexPtr = idIndex.find(id);
-        if (heap[id].deleted) {
+        if (heap[*idIndexPtr].deleted) {
             return nullptr;
         }
         return &heap[*idIndexPtr];
@@ -73,6 +73,7 @@ struct Engine {
     // Returns all records with ID in the range [lo, hi].
     // Also reports the number of key comparisons performed.
     vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
+        cmpOut = 0;
         vector<const Record*> out;
         idIndex.rangeApply(lo, hi, [&](const int &k, int &rid) {
             cmpOut++;
@@ -86,14 +87,15 @@ struct Engine {
     // Returns all records whose last name begins with a given prefix.
     // Case-insensitive using lowercase comparison.
     vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
+        cmpOut = 0;
         vector<const Record*> out;
-        idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
-            string lastName = heap[rid].last;
-            cmpOut++;
-            if (toLower(lastName) == toLower(prefix)) {
-                out.push_back(&heap[rid]);
-            }
-        });
+        // idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
+        //     string lastName = heap[rid].last;
+        //     cmpOut++;
+        //     if (toLower(lastName) == toLower(prefix)) {
+        //         out.push_back(&heap[rid]);
+        //     }
+        // });
         return out;
     }
 };
