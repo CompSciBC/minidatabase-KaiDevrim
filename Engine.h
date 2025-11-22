@@ -28,7 +28,7 @@ struct Engine {
     // Inserts a new record and updates both indexes.
     // Returns the record ID (RID) in the heap.
     int insertRecord(const Record &recIn) {
-        int recordIndex = (rand() % 1000) + 1;
+        int recordIndex = heap.size();
         if (recordIndex > idRange) {
             idRange = recordIndex;
         }
@@ -70,6 +70,9 @@ struct Engine {
     // Outputs the number of comparisons made in the search.
     const Record *findById(int id, int &cmpOut) {
         int* idIndexPtr = idIndex.find(id);
+        if (idIndexPtr == nullptr) {
+            return nullptr;
+        }
         if (heap[*idIndexPtr].deleted) {
             return nullptr;
         }
