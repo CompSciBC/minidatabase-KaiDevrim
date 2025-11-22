@@ -38,14 +38,15 @@ struct Engine {
         // this may output null
         // null means we have no duplicates therefore we need to make a new vector
         // not null means we just push the heap.size to it
-        vector<int>* lastIndexKey = lastIndex.find(recIn.last);
-        vector<int> tempVector;
+        vector<int>* lastIndexKey = lastIndex.find(toLower(recIn.last));
+        vector<int> temp1Vector;
         if (lastIndexKey != nullptr) {
             lastIndexKey->push_back(recordIndex);
-            lastIndex.insert(recIn.last, *lastIndexKey);
+            //lastIndex.insert(toLower(recIn.last), *lastIndexKey);
         } else if (lastIndexKey == nullptr) {
+            vector<int> tempVector;
             tempVector.push_back(recordIndex);
-            lastIndex.insert(recIn.last, tempVector);
+            lastIndex.insert(toLower(recIn.last), tempVector);
         }
         return recordIndex;
     }
@@ -54,6 +55,7 @@ struct Engine {
     // Returns true if deletion succeeded.
     bool deleteById(int id) {
         // find idIndex
+        idIndex.resetMetrics();
         int* idIndexPtr = idIndex.find(id);
         if (idIndexPtr == nullptr) {
             return false;
@@ -69,26 +71,26 @@ struct Engine {
     // Returns a pointer to the record, or nullptr if not found.
     // Outputs the number of comparisons made in the search.
     const Record *findById(int id, int &cmpOut) {
-        cmpOut = 0;
-        Record* student;
-        idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
-            cmpOut++;
-            if (k == id) {
-                if (&heap[rid].deleted) {
-                    student = nullptr;
-                }
-                else {
-                    student = &heap[rid];
-                }
-            }
-        });
-        return student;
+        idIndex.resetMetrics();
+        int* ridPtr = idIndex.find(id);
+        cmpOut = idIndex.comparisons;
+        
+        if (ridPtr == nullptr) {
+            return nullptr;
+        }
+        
+        int rid = *ridPtr;
+        if (rid < 0 || rid >= (int)heap.size() || heap[rid].deleted) {
+            return nullptr;
+        }
+        
+        return &heap[rid];
     }
 
     // Returns all records with ID in the range [lo, hi].
     // Also reports the number of key comparisons performed.
     vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
-        cmpOut = 0;
+        idIndex.resetMetrics();
         vector<const Record*> out;
         idIndex.rangeApply(lo, hi, [&](const int &k, int &rid) {
             cmpOut++;
@@ -96,6 +98,7 @@ struct Engine {
                 out.push_back(&heap[rid]);
             }
         });
+        cmpOut = idIndex.comparisons;
         return out;
     }
 
@@ -103,17 +106,19 @@ struct Engine {
     // Case-insensitive using lowercase comparison.
     vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
         cmpOut = 0;
+        lastIndex.resetMetrics();
         vector<const Record*> out;
         lastIndex.rangeApply(toLower(prefix), toLower(prefix + '~'), [&](const string &k, vector<int> &rid) {
             cmpOut++;
             if (toLower(k).rfind(toLower(prefix), 0) == 0) {
                 for (int id : rid) {
-                    if (id >= 0 && id < idRange && !heap[id].deleted) {
+                    if (id >= 0 && id < (int)heap.size() && !heap[id].deleted) {
                         out.push_back(&heap[id]);
                     }
                 }
             }
         });
+        cmpOut = lastIndex.comparisons;
         return out;
     }
 };
