@@ -67,7 +67,7 @@ struct Engine {
         if (heap[id].deleted) {
             return nullptr;
         }
-        return idIndexPtr;
+        return &heap[*idIndexPtr];
     }
 
     // Returns all records with ID in the range [lo, hi].
