@@ -69,14 +69,20 @@ struct Engine {
     // Returns a pointer to the record, or nullptr if not found.
     // Outputs the number of comparisons made in the search.
     const Record *findById(int id, int &cmpOut) {
-        int* idIndexPtr = idIndex.find(id);
-        if (idIndexPtr == nullptr) {
-            return nullptr;
-        }
-        if (heap[*idIndexPtr].deleted) {
-            return nullptr;
-        }
-        return &heap[*idIndexPtr];
+        cmpOut = 0;
+        Record* student;
+        idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
+            cmpOut++;
+            if (k == id) {
+                if (&heap[rid].deleted) {
+                    student = nullptr;
+                }
+                else {
+                    student = &heap[rid];
+                }
+            }
+        });
+        return student;
     }
 
     // Returns all records with ID in the range [lo, hi].
@@ -98,11 +104,14 @@ struct Engine {
     vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
         cmpOut = 0;
         vector<const Record*> out;
-        idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
-            string lastName = heap[rid].last;
+        lastIndex.rangeApply(toLower(prefix), toLower(prefix + '~'), [&](const string &k, vector<int> &rid) {
             cmpOut++;
-            if (toLower(lastName) == toLower(prefix)) {
-                out.push_back(&heap[rid]);
+            if (toLower(k).rfind(toLower(prefix), 0) == 0) {
+                for (int id : rid) {
+                    if (id >= 0 && id < idRange && !heap[id].deleted) {
+                        out.push_back(&heap[id]);
+                    }
+                }
             }
         });
         return out;
