@@ -27,7 +27,16 @@ struct Engine {
     // Inserts a new record and updates both indexes.
     // Returns the record ID (RID) in the heap.
     int insertRecord(const Record &recIn) {
-        //TODO
+        int recordIndex = rand();
+        heap.push_back(recIn);
+        idIndex.insert(recIn.id, recordIndex));
+
+        // this may output null
+        // null means we have no duplicates therefore we need to make a new vector
+        // not null means we just push the heap.size to it
+        vector<int>* lastIndexKey = lastIndex.find(recIn.last);
+        lastIndex.insert(recIn.last, *(lastIndexKey));
+        return recordIndex;
     }
 
     // Deletes a record logically (marks as deleted and updates indexes)
