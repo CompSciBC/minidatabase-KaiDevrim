@@ -98,13 +98,13 @@ struct Engine {
     vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
         cmpOut = 0;
         vector<const Record*> out;
-        // idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
-        //     string lastName = heap[rid].last;
-        //     cmpOut++;
-        //     if (toLower(lastName) == toLower(prefix)) {
-        //         out.push_back(&heap[rid]);
-        //     }
-        // });
+        idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
+            string lastName = heap[rid].last;
+            cmpOut++;
+            if (toLower(lastName) == toLower(prefix)) {
+                out.push_back(&heap[rid]);
+            }
+        });
         return out;
     }
 };
