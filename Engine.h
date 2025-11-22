@@ -63,11 +63,11 @@ struct Engine {
     // Returns a pointer to the record, or nullptr if not found.
     // Outputs the number of comparisons made in the search.
     const Record *findById(int id, int &cmpOut) {
-        Record student;
+        Record* student;
         idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
             cmpOut++;
             if (&heap[rid].id == &id) {
-                student = heap[rid];
+                student = &heap[rid];
                 return student;
             }
         });
