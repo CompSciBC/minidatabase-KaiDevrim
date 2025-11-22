@@ -39,14 +39,23 @@ struct Engine {
         // null means we have no duplicates therefore we need to make a new vector
         // not null means we just push the heap.size to it
         vector<int>* lastIndexKey = lastIndex.find(recIn.last);
-        lastIndex.insert(recIn.last, *(lastIndexKey));
+        vector<int> tempVector;
+        if (lastIndexKey != nullptr) {
+            lastIndexKey->push_back(recordIndex);
+            lastIndex.insert(recIn.last, *lastIndexKey);
+        } else if (lastIndexKey == nullptr) {
+            tempVector.push_back(recordIndex);
+            lastIndex.insert(recIn.last, tempVector);
+        }
         return recordIndex;
     }
 
     // Deletes a record logically (marks as deleted and updates indexes)
     // Returns true if deletion succeeded.
     bool deleteById(int id) {
-        heap[id].deleted = true;
+        // find idIndex
+        int idIndexPtr = *(idIndex.find(id));
+        heap[idIndexPtr].deleted = true;
         return idIndex.erase(id);
     }
 
@@ -70,9 +79,9 @@ struct Engine {
     vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
         vector<const Record*> out;
         idIndex.rangeApply(lo, hi, [&](const int &k, int &rid) {
+            cmpOut++;
             if (rid >= 0 && rid < idRange && !heap[rid].deleted) {
                 out.push_back(&heap[rid]);
-                cmpOut++;
             }
         });
         return out;
@@ -84,6 +93,7 @@ struct Engine {
         vector<const Record*> out;
         idIndex.rangeApply(0, idRange, [&](const int &k, int &rid) {
             string lastName = heap[rid].last;
+            cmpOut++;
             if (toLower(lastName) == toLower(prefix)) {
                 out.push_back(&heap[rid]);
             }
