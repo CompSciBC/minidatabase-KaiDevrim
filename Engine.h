@@ -54,8 +54,14 @@ struct Engine {
     // Returns true if deletion succeeded.
     bool deleteById(int id) {
         // find idIndex
-        int idIndexPtr = *(idIndex.find(id));
-        heap[idIndexPtr].deleted = true;
+        int* idIndexPtr = idIndex.find(id);
+        if (idIndexPtr == nullptr) {
+            return false;
+        }
+        if (*idIndexPtr < 0 || *idIndexPtr >= idRange) {
+            return false;
+        }
+        heap[*idIndexPtr].deleted = true;
         return idIndex.erase(id);
     }
 
